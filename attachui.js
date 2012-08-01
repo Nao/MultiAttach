@@ -196,29 +196,32 @@ $(function (jQuery, undefined)
 			return;
 		}
 
-		var $container = $('<span>');
+		var $container = $('<div>');
 
 		$('<input type="button" class="delete" style="margin-top: 4px">')
 			.val(we_cancel)
 			.click(function ()
 			{
-				var i = $(this).data('id'), n = i + 1, len = $files.length;
+				var i = $(this).parent().data('id'), n = i + 1, len = $files.length;
 
 				$(this).parent().remove();
+
+				delete $files[i];
 
 				// Shift consecutive file element's index
 				for (; n < len; n++)
 				{
 					var file = $files[n];
-					delete $files[n];
+					file.element.data('id', n - 1);
 					$files[n - 1] = file;
+					delete $files[n];
 				}
 
 				// This the one being uploaded?
 				if (i == $current && $is_uploading)
 				{
-					// !! @todo: this doesn't work. It'll keep uploading...
 					xhr.abort();
+					$is_uploading = false;
 					$current--;
 					startUpload();
 				}
@@ -251,7 +254,7 @@ $(function (jQuery, undefined)
 			}
 		}
 
-		$container.appendTo($element.parent().append('<br><br>'));
+		$container.appendTo($element.parent());
 		$files[$files.length] = files[i];
 		$files[$files.length - 1].element = $container;
 		$container.data('id', $files.length - 1);
